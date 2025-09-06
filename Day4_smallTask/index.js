@@ -26,16 +26,31 @@ app.get('/file/:filename', function (req, res) {
     });
 });
 
+app.get('/edit/:filename', function(req,res){
+        res.render("edit", {filename: req.params.filename});
+})
 
-app.post('/create', function(req,res){
-    const fileName = req.body.title.split(' ').join('') + ".txt"; 
-    fs.writeFile(`./files/${fileName}`, req.body.details, function (err) {
+app.post('/edit', function(req,res){
+        fs.rename(`./files/${req.body.previous}`, `./files/${req.body.new}`, function(err){
+            res.redirect('/');
+        })
+})
+
+app.post('/create', function (req, res) {
+    if (!req.body.title) {
+        return res.status(400).send("Title is required.");
+    }
+
+    const fileName = req.body.title.split(' ').join('') + ".txt";
+
+    fs.writeFile(`./files/${fileName}`, req.body.details || "", function (err) {
         if (err) {
             console.log(err);
             return res.status(500).send("Error creating file.");
         }
         res.redirect('/');
     });
-})
+});
+
 
 app.listen(3000);
